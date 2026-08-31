@@ -77,14 +77,38 @@ exports.promotionVideo = () => {
 
 function getSubsFromFile () {
   const subtitles = config.get<string>('application.promotion.subtitles') ?? 'owasp_promo.vtt'
-  const data = fs.readFileSync('frontend/dist/frontend/assets/public/videos/' + subtitles, 'utf8')
-  return data.toString()
+  const frontendPath = 'frontend/dist/frontend/assets/public/videos/' + subtitles
+  if (fs.existsSync(frontendPath)) {
+    return fs.readFileSync(frontendPath, 'utf8').toString()
+  }
+  const fallbackPath = 'data/static/' + subtitles
+  if (fs.existsSync(fallbackPath)) {
+    return fs.readFileSync(fallbackPath, 'utf8').toString()
+  }
+  // If neither file exists, return an empty string to avoid crashing the server
+  try {
+    return fs.readFileSync(frontendPath, 'utf8').toString()
+  } catch (e) {
+    return ''
+  }
 }
 
 function videoPath () {
   if (config.get<string>('application.promotion.video') !== null) {
     const video = utils.extractFilename(config.get<string>('application.promotion.video'))
-    return 'frontend/dist/frontend/assets/public/videos/' + video
+    const frontendPath = 'frontend/dist/frontend/assets/public/videos/' + video
+    if (fs.existsSync(frontendPath)) {
+      return frontendPath
+    }
+    const fallbackPath = 'data/static/' + video
+    if (fs.existsSync(fallbackPath)) {
+      return fallbackPath
+    }
+    return frontendPath
   }
-  return 'frontend/dist/frontend/assets/public/videos/owasp_promo.mp4'
+  const defaultFrontend = 'frontend/dist/frontend/assets/public/videos/owasp_promo.mp4'
+  if (fs.existsSync(defaultFrontend)) {
+    return defaultFrontend
+  }
+  return 'data/static/owasp_promo.mp4'
 }
