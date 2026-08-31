@@ -112,3 +112,9 @@ function videoPath () {
   }
   return 'data/static/owasp_promo.mp4'
 }
+
+// Expose internal helpers for unit testing
+exports.__test__ = {
+  getSubsFromFile: getSubsFromFile,
+  videoPath: videoPath
+}
